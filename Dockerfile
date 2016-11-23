@@ -1,8 +1,8 @@
-FROM cheggwpt/nginx:0.0.1
+FROM cheggwpt/nginx:0.0.2
+MAINTAINER jgilley@chegg.com
 
-RUN	apk --update --no-cache add \
-	--virtual .build_package git curl php7-dev build-base autoconf \
-	--virtual .php_service \
+# Install php7
+RUN	apk --update add --virtual .php_service \
 		mysql-client \
 		php7 \
 		php7-bcmath \
@@ -30,8 +30,11 @@ RUN	apk --update --no-cache add \
 		php7-sqlite3 \
 		php7-xmlreader \
 		php7-xmlrpc \
-		php7-zip \
-		--virtual .redis_tools hiredis hiredis-dev 
+		php7-zip && \
+	apk add --virtual .redis_tools hiredis hiredis-dev && \
+	apk add --virtual .build_package \
+		git curl php7-dev build-base autoconf && \
+	rm -rf /var/cache/apk/*
 
 # Add the files
 COPY container_confs /
@@ -52,7 +55,7 @@ RUN ln -s /usr/bin/php7 /usr/bin/php && \
 	mkdir -p /run/php && \
 	chown -R www-data:www-data /run/php 
 
-# build phpiredis
+# build phpiredis and cleanup build packages
 RUN cd /tmp && \
 	git clone https://github.com/nrk/phpiredis.git phpiredis && \
 	cd phpiredis && \
@@ -63,10 +66,5 @@ RUN cd /tmp && \
 	make install && \
 	echo 'extension=phpiredis.so' > /etc/php7/conf.d/33-phpiredis.ini && \
 	cd /tmp && \
-	rm -rf phpiredis /var/cache/apk/* 
-
-# Expose the ports for nginx
-EXPOSE 80 443
-
-ENTRYPOINT ["/entrypoint.sh"]
-CMD ["supervisor"]
+	rm -rf phpiredis /var/cache/apk/* && \
+	apk del .build_package
