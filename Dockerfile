@@ -1,4 +1,4 @@
-FROM cheggwpt/nginx:latest
+FROM cheggwpt/nginx:0.0.1
 
 RUN	apk --update --no-cache add \
 	--virtual .build_package git curl php7-dev build-base autoconf \
