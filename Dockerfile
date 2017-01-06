@@ -1,4 +1,4 @@
-FROM cheggwpt/nginx:latest
+FROM cheggwpt/nginx:0.0.5
 
 RUN	apk --update --no-cache add \
 	--virtual .build_package git curl php7-dev build-base autoconf \
@@ -65,8 +65,3 @@ RUN cd /tmp && \
 	cd /tmp && \
 	rm -rf phpiredis /var/cache/apk/* 
 
-# Expose the ports for nginx
-EXPOSE 80 443
-
-ENTRYPOINT ["/entrypoint.sh"]
-CMD ["supervisor"]
